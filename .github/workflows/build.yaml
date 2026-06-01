@@ -1,0 +1,41 @@
+name: Build
+
+on: [workflow_call, workflow_dispatch]
+
+jobs:
+  build:
+    name: ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: "go.mod"
+
+      - name: Set variables
+        id: vars
+        run: |
+          # set the binary extension for Windows
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            echo "EXT=.exe" >> $GITHUB_OUTPUT
+          else
+            echo "EXT=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build
+        run: |
+          mkdir bin
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+          go generate ./... \
+          go build -v -o bin/gitcc-${{ matrix.goos }}-${{ matrix.goarch }}${{ steps.vars.outputs.EXT }} ./cmd/gitcc
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: gitcc-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: bin/

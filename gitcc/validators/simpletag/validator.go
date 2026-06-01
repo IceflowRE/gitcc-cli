@@ -1,0 +1,61 @@
+package simpletag
+
+import (
+	"regexp"
+
+	"github.com/go-git/go-git/v6/plumbing/object"
+
+	"github.com/IceflowRE/gitcc/v3/standalone/gitcc"
+)
+
+var (
+	rxParser      = regexp.MustCompile(`^\[(.*)\] (.*)$`)
+	rxCategory    = regexp.MustCompile(`^(?:[a-z0-9]{2,}|[a-z0-9][ -][a-z0-9]+)(?:[ -][a-z0-9]+)*(?:\|(?:[a-z0-9]{2,}|[a-z0-9][ -][a-z0-9]+)(?:[ -][a-z0-9]+)*)*$`)
+	rxDescription = regexp.MustCompile(`^[A-Z0-9]\S*(?:\s\S*)+[^.!?,\s]$`)
+)
+
+const Name = "simpletag"
+
+type Validator struct {
+	gitcc.BaseValidator
+}
+
+func NewValidator() (gitcc.Validator, error) {
+	return &Validator{}, nil
+}
+
+func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
+	return v.validateSummary(gitcc.MessageToSummary(commit.Message))
+}
+
+func (*Validator) validateSummary(summary string) gitcc.Result {
+	matches := rxParser.FindStringSubmatch(summary)
+
+	if len(matches) != 3 {
+		return gitcc.Result{
+			Status:  gitcc.Invalid,
+			Message: "Summary format is invalid. It must follow '[<tag>] <Good Description>'",
+		}
+	}
+
+	if !rxCategory.MatchString(matches[1]) {
+		return gitcc.Result{
+			Status: gitcc.Invalid,
+			Message: "Invalid category tag. It should be either a single '*' or completely lowercase " +
+				"letters or numbers, at least 2 characters long, other allowed characters are: '|', '-' and spaces.",
+		}
+	}
+
+	if !rxDescription.MatchString(matches[2]) {
+		return gitcc.Result{
+			Status: gitcc.Invalid,
+			Message: "Invalid description. It should start with an uppercase letter or number, " +
+				"should be not to short and should not end with a punctuation.",
+		}
+	}
+
+	return gitcc.Result{
+		Status:  gitcc.Valid,
+		Message: "",
+	}
+}

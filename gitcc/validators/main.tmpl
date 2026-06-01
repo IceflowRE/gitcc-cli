@@ -1,0 +1,32 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"os"
+
+	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/cli"
+)
+
+func main() {
+	val, err := NewValidator()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating validator: %v\n", err)
+		os.Exit(3)
+	}
+
+	c := cli.NewCli(val)
+
+	err = c.Execute()
+	if err == nil {
+		return
+	}
+
+	var exitErr *cli.ExitError
+	if errors.As(err, &exitErr) {
+		os.Exit(exitErr.Code)
+	}
+	fmt.Fprintln(os.Stderr, err)
+
+	os.Exit(3)
+}
