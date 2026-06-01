@@ -15,6 +15,7 @@ jobs:
     uses: ./.github/workflows/codeql.yaml
     permissions:
       actions: read
+      contents: read
       security-events: write
 
   golangci-lint:
