@@ -30,8 +30,8 @@ jobs:
       - name: Build
         run: |
           mkdir bin
+          go generate ./...
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-          go generate ./... \
           go build -v -o bin/gitcc-${{ matrix.goos }}-${{ matrix.goarch }}${{ steps.vars.outputs.EXT }} ./cmd/gitcc
 
       - name: Upload Artifacts
