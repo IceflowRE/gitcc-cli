@@ -11,12 +11,16 @@ func PruneValidators() (deletedDirs []string, err error) {
 	if err != nil {
 		return nil, err
 	}
-	curValidatorDir, err := getValidatorCacheDir()
+	curValidatorDir, err := GetValidatorCacheDir()
 	if err != nil {
 		return nil, err
 	}
 
-	root, err := os.OpenRoot(curValidatorDir)
+	return deleteValidators(gitccDir, curValidatorDir)
+}
+
+func deleteValidators(gitccDir string, curValidatorDir string) (deletedDirs []string, err error) {
+	root, err := os.OpenRoot(gitccDir)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +38,11 @@ func PruneValidators() (deletedDirs []string, err error) {
 			return filepath.SkipDir
 		}
 		if dir.IsDir() {
-			err := root.RemoveAll(path)
+			relPath, err := filepath.Rel(gitccDir, path)
+			if err != nil {
+				return err
+			}
+			err = root.RemoveAll(relPath)
 			if err != nil {
 				return err
 			}
