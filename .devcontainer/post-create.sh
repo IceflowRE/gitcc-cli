@@ -4,9 +4,7 @@ set -ex
 git config --global --add safe.directory /workspaces/gitcc
 
 # download go modules
-cd ./standalone
 go mod download
-cd ../
 
 # install golangci-lint and build custom golangci-lint
 echo "Installing golangci-lint"
