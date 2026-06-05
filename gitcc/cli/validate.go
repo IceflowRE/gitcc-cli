@@ -59,10 +59,11 @@ func newValidateBaseCmd(ccmd *cobra.Command, ctx *validationContext) *validateBa
 		"Options to pass to the validator in the format --options key=value. This flag can be specified multiple times for multiple options.")
 
 	if ctx.validator == nil {
+		cmd.PreRunE = cmd.preRunE
+	} else {
 		_ = cmd.PersistentFlags().MarkHidden("compile")
 		_ = cmd.PersistentFlags().MarkHidden("name")
 		_ = cmd.PersistentFlags().MarkHidden("path")
-		cmd.PreRunE = cmd.preRunE
 	}
 
 	return cmd
