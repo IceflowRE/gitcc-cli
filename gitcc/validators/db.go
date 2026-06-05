@@ -30,6 +30,7 @@ import (
 var ErrValidatorNotFound = errors.New("validator not found")
 
 // DB represents a database of validators, including both built-in and custom validators.
+// The database it no ment to be in a long running session, compiled validators are not added.
 type DB struct {
 	builtin          map[string]func() (gitcc.Validator, error)
 	validatorDir     string
@@ -38,7 +39,7 @@ type DB struct {
 
 // NewDB initializes a new DB instance by loading built-in validators and refreshing custom validators from the cache directory.
 func NewDB() (*DB, error) {
-	valCacheDir, err := getValidatorCacheDir()
+	valCacheDir, err := GetValidatorCacheDir()
 	if err != nil {
 		return nil, err
 	}
@@ -224,6 +225,9 @@ func (db *DB) refreshCustomValidators() error {
 		if dir.IsDir() && path != db.validatorDir {
 			return filepath.SkipDir
 		}
+		if path == db.validatorDir {
+			return nil
+		}
 
 		meta := getMetaFromName(dir.Name())
 		if meta != nil {
@@ -265,7 +269,8 @@ func GetGitccCacheDir() (string, error) {
 	return cacheDir, nil
 }
 
-func getValidatorCacheDir() (string, error) {
+// GetValidatorCacheDir returns the path to the cache directory for validators, creating it if it does not exist.
+func GetValidatorCacheDir() (string, error) {
 	cacheDir, err := GetGitccCacheDir()
 	if err != nil {
 		return "", err

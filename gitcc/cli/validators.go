@@ -49,9 +49,9 @@ func newValidatorsCmd(ctx *validationContext) *validatorsCmd {
 		RunE:  cmd.compileValidator,
 	})
 	cmd.AddCommand(&cobra.Command{
-		Use:   "cache",
-		Short: "print cache directory",
-		RunE:  cmd.printCacheDir,
+		Use:   "dir",
+		Short: "print validator directory",
+		RunE:  cmd.printValidatorDir,
 	})
 
 	return cmd
@@ -130,8 +130,8 @@ func (cmd *validatorsCmd) compileValidator(_ *cobra.Command, args []string) (err
 	return nil
 }
 
-func (cmd *validatorsCmd) printCacheDir(_ *cobra.Command, _ []string) (err error) {
-	path, err := validators.GetGitccCacheDir()
+func (cmd *validatorsCmd) printValidatorDir(_ *cobra.Command, _ []string) (err error) {
+	path, err := validators.GetValidatorCacheDir()
 	if err != nil {
 		return fmt.Errorf("failed to get cache directory: %w", err)
 	}
