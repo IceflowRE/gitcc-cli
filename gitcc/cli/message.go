@@ -29,7 +29,12 @@ func newMessageCmd(ctx *validationContext) (cmd *messageCmd) {
 		"Path to a text file to validate.")
 
 	cmd.RunE = cmd.runE
-	cmd.PreRunE = func(_ *cobra.Command, args []string) error {
+	basePreRunE := cmd.PreRunE
+	cmd.PreRunE = func(cCmd *cobra.Command, args []string) error {
+		err := basePreRunE(cCmd, args)
+		if err != nil {
+			return err
+		}
 		if len(args) != 0 && cmd.file != "" {
 			return errors.New("cannot specify both a message argument and --file flag") //nolint:err113
 		}
