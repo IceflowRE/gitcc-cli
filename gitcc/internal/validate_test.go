@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc"
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/internal"
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/validators/simpletag"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc/internal"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc/validators/simpletag"
 )
 
 //go:generate ../../create_testdata.sh testdata/simpletag

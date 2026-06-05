@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc"
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/internal"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc/internal"
 )
 
 type commitCmd struct {

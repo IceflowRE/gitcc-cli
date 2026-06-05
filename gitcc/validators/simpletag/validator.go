@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-git/go-git/v6/plumbing/object"
 
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc"
 )
 
 var (

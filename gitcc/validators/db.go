@@ -20,10 +20,10 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc"
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/internal"
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/validators/regex"
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/validators/simpletag"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc/internal"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc/validators/regex"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc/validators/simpletag"
 )
 
 // ErrValidatorNotFound is returned when a requested validator is not found in the database.
@@ -183,7 +183,7 @@ func (db *DB) compile(name string, path string, hash string) (string, error) {
 	}
 
 	// create go.mod
-	modData := []byte("module github.com/IceflowRE/gitcc/v3/standalone/custom")
+	modData := []byte("module github.com/IceflowRE/gitcc-cli/v3/custom")
 	err = os.WriteFile(filepath.Join(dir, "go.mod"), modData, 0o600) //nolint:revive
 	if err != nil {
 		return "", fmt.Errorf("write go.mod: %w", err)

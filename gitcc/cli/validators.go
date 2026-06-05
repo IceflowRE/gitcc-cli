@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/validators"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc/validators"
 )
 
 var errFailedToInitializeDB = errors.New("failed to initialize validator database")

@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/IceflowRE/gitcc/v3/standalone/gitcc"
+import "github.com/IceflowRE/gitcc-cli/v3/gitcc"
 
 // ExitError is a custom error type carrying an exit code. It does not carry any error.
 type ExitError struct {
