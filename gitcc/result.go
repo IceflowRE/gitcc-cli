@@ -45,7 +45,7 @@ func (res *Result) String() string {
 	if res.Commit != nil {
 		msg = fmt.Sprintf("%s | %s | %s", msg, res.Commit.Hash.String(), MessageToSummary(res.Commit.Message))
 	}
-	if res.Message != "" {
+	if res.Status != Valid && res.Message != "" {
 		msg = fmt.Sprintf("%s\n    : %s", msg, res.Message)
 	}
 
