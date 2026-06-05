@@ -1,9 +1,12 @@
+// Package validators provides functionality for managing and compiling custom validators for commit messages.
 package validators
 
 import (
+	"context"
 	"crypto/sha256"
 	_ "embed"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"maps"
 	"os"
@@ -13,6 +16,7 @@ import (
 	"runtime/debug"
 	"slices"
 	"strings"
+	"time"
 
 	"golang.org/x/mod/semver"
 
@@ -22,12 +26,17 @@ import (
 	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/validators/simpletag"
 )
 
+// ErrValidatorNotFound is returned when a requested validator is not found in the database.
+var ErrValidatorNotFound = errors.New("validator not found")
+
+// DB represents a database of validators, including both built-in and custom validators.
 type DB struct {
 	builtin          map[string]func() (gitcc.Validator, error)
 	validatorDir     string
 	customValidators []validatorMeta
 }
 
+// NewDB initializes a new DB instance by loading built-in validators and refreshing custom validators from the cache directory.
 func NewDB() (*DB, error) {
 	valCacheDir, err := getValidatorCacheDir()
 	if err != nil {
@@ -35,8 +44,8 @@ func NewDB() (*DB, error) {
 	}
 	db := &DB{
 		builtin: map[string]func() (gitcc.Validator, error){
-			regex.Name:     regex.NewValidator,
-			simpletag.Name: simpletag.NewValidator,
+			regex.Name:     func() (gitcc.Validator, error) { return regex.NewValidator() },
+			simpletag.Name: func() (gitcc.Validator, error) { return simpletag.NewValidator() },
 		},
 		validatorDir: valCacheDir,
 	}
@@ -48,6 +57,7 @@ func NewDB() (*DB, error) {
 	return db, nil
 }
 
+// AvailableNames returns a list of all available validator names, including both built-in and custom validators.
 func (db *DB) AvailableNames() []string {
 	names := slices.Collect(maps.Keys(db.builtin))
 
@@ -58,9 +68,9 @@ func (db *DB) AvailableNames() []string {
 	return names
 }
 
-var ErrValidatorNotFound = fmt.Errorf("validator not found")
-
-func (db *DB) GetBuiltin(name string) (gitcc.Validator, error) {
+// GetBuiltin retrieves a built-in validator by its name.
+// If the validator is not found, ErrValidatorNotFound is returned.
+func (db *DB) GetBuiltin(name string) (gitcc.Validator, error) { //nolint:ireturn
 	validatorFn, ok := db.builtin[name]
 	if ok {
 		return validatorFn()
@@ -69,6 +79,8 @@ func (db *DB) GetBuiltin(name string) (gitcc.Validator, error) {
 	return nil, ErrValidatorNotFound
 }
 
+// GetCustom retrieves a custom validator by the file path of its source code.
+// Only absolute paths should be passed.
 func (db *DB) GetCustom(path string) string {
 	hash, err := getShortSha256(path)
 	if err != nil {
@@ -78,6 +90,7 @@ func (db *DB) GetCustom(path string) string {
 	return db.getCustomByHash(hash)
 }
 
+// GetCustomByName retrieves a custom validator by its name.
 func (db *DB) GetCustomByName(name string) string {
 	idx := slices.IndexFunc(db.customValidators, func(elem validatorMeta) bool {
 		return elem.Name == name
@@ -89,6 +102,7 @@ func (db *DB) GetCustomByName(name string) string {
 	return filepath.Join(db.validatorDir, db.customValidators[idx].Filename())
 }
 
+// GetOrCompileCustom retrieves a custom validator by the file path or compiles it if it does not exist or is outdated.
 func (db *DB) GetOrCompileCustom(path string, name string) (string, error) {
 	hash, err := getShortSha256(path)
 	if err != nil {
@@ -103,10 +117,15 @@ func (db *DB) GetOrCompileCustom(path string, name string) (string, error) {
 	return db.CompileCustom(path, name, hash)
 }
 
-// if hash is empty it will be calculated
+// ErrInvalidNameAndPath is returned when both name and path are invalid.
+var ErrInvalidNameAndPath = errors.New("invalid name and path")
+
+// CompileCustom compiles a custom validator from the specified source file and stores it in the database.
+// If a validator with the same name or hash already exists, it will be replaced.
+// If the hash is not provided, it will be computed from the source file.
 func (db *DB) CompileCustom(path string, name string, hash string) (validatorPath string, err error) {
 	if name == "" && path == "" {
-		return "", fmt.Errorf("invalid name and path")
+		return "", ErrInvalidNameAndPath
 	}
 
 	if hash == "" {
@@ -148,11 +167,11 @@ func (db *DB) compile(name string, path string, hash string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer os.RemoveAll(dir)
+	defer os.RemoveAll(dir) //nolint:errcheck
 
 	// create main.go
 	mainPath := filepath.Join(dir, "main.go")
-	err = os.WriteFile(mainPath, mainFile, 0o600)
+	err = os.WriteFile(mainPath, mainFile, 0o600) //nolint:revive
 	if err != nil {
 		return "", fmt.Errorf("write main.go: %w", err)
 	}
@@ -165,13 +184,16 @@ func (db *DB) compile(name string, path string, hash string) (string, error) {
 
 	// create go.mod
 	modData := []byte("module github.com/IceflowRE/gitcc/v3/standalone/custom")
-	err = os.WriteFile(filepath.Join(dir, "go.mod"), modData, 0o600)
+	err = os.WriteFile(filepath.Join(dir, "go.mod"), modData, 0o600) //nolint:revive
 	if err != nil {
 		return "", fmt.Errorf("write go.mod: %w", err)
 	}
 
 	// go mod tidy
-	tidyCmd := exec.Command("go", "mod", "tidy")
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
+	defer cancel()
+
+	tidyCmd := exec.CommandContext(ctx, "go", "mod", "tidy")
 	tidyCmd.Dir = dir
 	out, err := tidyCmd.CombinedOutput()
 	if err != nil {
@@ -179,8 +201,11 @@ func (db *DB) compile(name string, path string, hash string) (string, error) {
 	}
 
 	// compile
+	cCtx, cCancel := context.WithTimeout(context.Background(), 4*time.Minute)
+	defer cCancel()
+
 	outPath := filepath.Join(db.validatorDir, executableName(name, hash))
-	buildCmd := exec.Command("go", "build", "-o", outPath, ".")
+	buildCmd := exec.CommandContext(cCtx, "go", "build", "-o", outPath, ".") //nolint:gosec
 	buildCmd.Dir = dir
 	out, err = buildCmd.CombinedOutput()
 	if err != nil {
@@ -225,13 +250,14 @@ func executableName(name string, hash string) string {
 	return exeName
 }
 
+// GetGitccCacheDir returns the path to the cache directory for gitcc, creating it if it does not exist.
 func GetGitccCacheDir() (string, error) {
 	userCacheDir, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
 	}
 	cacheDir := filepath.Join(userCacheDir, "gitcc")
-	err = os.MkdirAll(cacheDir, 0o750)
+	err = os.MkdirAll(cacheDir, 0o750) //nolint:revive
 	if err != nil {
 		return "", err
 	}
@@ -245,7 +271,7 @@ func getValidatorCacheDir() (string, error) {
 		return "", err
 	}
 	dir := filepath.Join(cacheDir, getCurrentVersion())
-	err = os.MkdirAll(dir, 0o750)
+	err = os.MkdirAll(dir, 0o750) //nolint:revive
 	if err != nil {
 		return "", err
 	}
@@ -255,11 +281,12 @@ func getValidatorCacheDir() (string, error) {
 
 func shortSHA256(data []byte) string {
 	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:])[:10]
+
+	return hex.EncodeToString(sum[:])[:10] //nolint:revive
 }
 
 func getShortSha256(path string) (string, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
 		return "", err
 	}

@@ -2,6 +2,7 @@ package cli
 
 import "github.com/IceflowRE/gitcc/v3/standalone/gitcc"
 
+// ExitError is a custom error type carrying an exit code. It does not carry any error.
 type ExitError struct {
 	Code int
 }
@@ -15,7 +16,7 @@ func getExitErrorFromStatus(status gitcc.Status) error {
 	case gitcc.Invalid:
 		return &ExitError{Code: 1}
 	case gitcc.Warning:
-		return &ExitError{Code: 2}
+		return &ExitError{Code: 2} //nolint:revive
 	case gitcc.Valid:
 	default:
 		return nil

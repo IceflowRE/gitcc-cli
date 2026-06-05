@@ -57,6 +57,7 @@ func ValidateHistory(validator gitcc.Validator, repo *git.Repository, exitSha st
 	defer cIter.Close()
 
 	var results []gitcc.Result
+
 	err = cIter.ForEach(func(commit *object.Commit) error {
 		res := validator.Validate(commit)
 		res.Commit = commit
@@ -68,8 +69,11 @@ func ValidateHistory(validator gitcc.Validator, repo *git.Repository, exitSha st
 	return results, err
 }
 
+// ErrNoCommonAncestor is returned when no common ancestor is found between the source and target branches.
 var ErrNoCommonAncestor = errors.New("no common ancestor found")
 
+// GetMergeBase finds the common ancestor (merge base) between the current HEAD and the specified target branch.
+// It returns ErrNoCommonAncestor if no common ancestor is found.
 func GetMergeBase(repo *git.Repository, targetBranch string) (*object.Commit, error) {
 	sourceCommit, err := getHeadCommit(repo)
 	if err != nil {
@@ -94,6 +98,7 @@ func GetMergeBase(repo *git.Repository, targetBranch string) (*object.Commit, er
 	return res[0], nil
 }
 
+// LoadRepository opens a Git repository at the specified path. It detects the .git directory automatically.
 func LoadRepository(path string) (*git.Repository, error) {
 	repo, err := git.PlainOpenWithOptions(path, &git.PlainOpenOptions{
 		DetectDotGit: true,

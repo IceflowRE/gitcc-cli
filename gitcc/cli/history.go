@@ -41,7 +41,8 @@ func newHistoryCmd(ctx *validationContext) *historyCmd {
 	return cmd
 }
 
-func (cmd *historyCmd) runE(_ *cobra.Command, args []string) error {
+//nolint:gocognit
+func (cmd *historyCmd) runE(_cmd *cobra.Command, _args []string) error {
 	return cmd.validate(func(validator gitcc.Validator) error {
 		repo, err := internal.LoadRepository(cmd.dir)
 		if err != nil {

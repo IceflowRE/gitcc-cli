@@ -1,3 +1,4 @@
+// Package main is the entry point for the gitcc CLI application.
 package main
 
 import (
@@ -17,10 +18,11 @@ func main() {
 	}
 
 	var exitErr *cli.ExitError
+
 	if errors.As(err, &exitErr) {
 		os.Exit(exitErr.Code)
 	}
 	fmt.Fprintln(os.Stderr, err)
 
-	os.Exit(3)
+	os.Exit(3) //nolint:revive
 }

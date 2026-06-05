@@ -1,15 +1,22 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/IceflowRE/gitcc/v3/standalone/gitcc"
 	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/validators"
+)
+
+var (
+	errValidatorNotFound = errors.New("validator not found")
+	errValidatorNotExist = errors.New("validator does not exist, compile it first")
 )
 
 type validationContext struct {
@@ -47,13 +54,14 @@ func newValidateBaseCmd(ccmd *cobra.Command, ctx *validationContext) *validateBa
 	cmd.PersistentFlags().StringVarP(&cmd.validatorPath, "path", "", "",
 		"Path to a go file with a validator implementation.")
 	cmd.PersistentFlags().BoolVarP(&cmd.compileIfMissing, "compile", "c", false,
-		"Compile the validator if it is outdated or missing. This flag is only applicable when --path is specified. Note that this will compile and execute code from the specified path.")
+		"Compile the validator if it is outdated or missing. This flag is only applicable when --path is specified. Note that this will compile and execute code from the specified path.") //nolint:lll
 	cmd.PersistentFlags().StringToStringVarP(&cmd.options, "options", "o", nil,
 		"Options to pass to the validator in the format --options key=value. This flag can be specified multiple times for multiple options.")
+
 	if ctx.validator == nil {
-		cmd.PersistentFlags().MarkHidden("compile")
-		cmd.PersistentFlags().MarkHidden("name")
-		cmd.PersistentFlags().MarkHidden("path")
+		_ = cmd.PersistentFlags().MarkHidden("compile")
+		_ = cmd.PersistentFlags().MarkHidden("name")
+		_ = cmd.PersistentFlags().MarkHidden("path")
 		cmd.PreRunE = cmd.preRunE
 	}
 
@@ -62,7 +70,7 @@ func newValidateBaseCmd(ccmd *cobra.Command, ctx *validationContext) *validateBa
 
 func (cmd *validateBaseCmd) preRunE(*cobra.Command, []string) (err error) {
 	if cmd.validatorName == "" && cmd.validatorPath == "" {
-		return errors.New("must specify either --name or --path")
+		return errors.New("must specify either --name or --path") //nolint:err113
 	}
 	cmd.ctx.db, err = validators.NewDB()
 	if err != nil {
@@ -99,13 +107,17 @@ func (cmd *validateBaseCmd) execExternal() (err error) {
 		return err
 	}
 
-	valCmd := exec.Command(validatorExecutable, os.Args[1:]...)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
+	valCmd := exec.CommandContext(ctx, validatorExecutable, os.Args[1:]...) //nolint:gosec
 	valCmd.Stdin = os.Stdin
 	valCmd.Stdout = os.Stdout
 	valCmd.Stderr = os.Stderr
 
 	err = valCmd.Run()
 	var exitErr *exec.ExitError
+
 	if errors.As(err, &exitErr) {
 		return &ExitError{exitErr.ExitCode()}
 	}
@@ -126,12 +138,12 @@ func (cmd *validateBaseCmd) getExternalValidator() (validatorExecutable string, 
 	case cmd.validatorPath != "":
 		validatorExecutable = cmd.ctx.db.GetCustom(cmd.validatorPath)
 		if validatorExecutable == "" {
-			return "", fmt.Errorf("validator does not exist, compile it first")
+			return "", errValidatorNotExist
 		}
 	case cmd.validatorName != "":
 		validatorExecutable = cmd.ctx.db.GetCustomByName(cmd.validatorName)
 		if validatorExecutable == "" {
-			return "", fmt.Errorf("validator '%s' not found", cmd.validatorName)
+			return "", fmt.Errorf("%w: %s", errValidatorNotFound, cmd.validatorName)
 		}
 	default:
 	}

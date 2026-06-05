@@ -25,6 +25,7 @@ func newCommitCmd(ctx *validationContext) *commitCmd {
 	}
 	cmd.Flags().StringVarP(&cmd.dir, "dir", "", "./",
 		"Path to a git repository. If not specified, the current directory is used.")
+
 	cmd.RunE = cmd.runE
 
 	return cmd
@@ -38,6 +39,7 @@ func (cmd *commitCmd) runE(_ *cobra.Command, args []string) error {
 		}
 
 		var res gitcc.Result
+
 		if len(args) == 0 {
 			res, err = internal.ValidateHead(validator, repo)
 		} else {

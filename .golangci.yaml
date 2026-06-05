@@ -22,6 +22,8 @@ linters:
     - exhaustruct
     # inits are required to setup global states
     - gochecknoinits
+    # covered by revive: add-constant
+    - mnd
     # naked returns are not allowed, they make the code less readable and harder to maintain
     - nakedret
     # named returns are better self documenting
@@ -50,6 +52,14 @@ linters:
             - var-decl-pkg
             - var-decl-init-func
             - var-decl-init-pkg
+    errcheck:
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - fmt.Print
+        - fmt.Printf
+        - fmt.Println
     funlen:
       lines: 80
     gocognit:
@@ -64,7 +74,7 @@ linters:
         - name: add-constant
           exclude: [""]
           arguments:
-            - allow-strs: '""," "'
+            - allow-strs: '""," ","%w: %w"'
               allow-ints: "0,1"
               allow-floats: "0.0,1.0"
         # covered by gocognit
@@ -76,14 +86,19 @@ linters:
         # covered by funlen
         - name: function-length
           disabled: true
+        # covered by lll
         - name: line-length-limit
-          arguments: [160]
+          disabled: true
+        # covered by errcheck
+        - name: unhandled-error
+          disabled: true
         # everything starting with underscore is considered as intentionally unused, but may have a name to improve readability
         - name: unused-parameter
           arguments:
             - allow-regex: "^_.*"
     varnamelen:
       ignore-names:
+        - "db"
         - "err"
         - "fn"
     wsl_v5:

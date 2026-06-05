@@ -15,8 +15,10 @@ import (
 
 func TestHeadSimpleTag(t *testing.T) {
 	t.Parallel()
+
 	repoOk, err := internal.LoadRepository("testdata/simpletag")
 	require.NoError(t, err)
+
 	repoFail, err := internal.LoadRepository("testdata/simpletag_fail")
 	require.NoError(t, err)
 
@@ -34,8 +36,10 @@ func TestHeadSimpleTag(t *testing.T) {
 
 func TestHistorySimpleTag(t *testing.T) {
 	t.Parallel()
+
 	repoOk, err := internal.LoadRepository("testdata/simpletag")
 	require.NoError(t, err)
+
 	repoFail, err := internal.LoadRepository("testdata/simpletag_fail")
 	require.NoError(t, err)
 

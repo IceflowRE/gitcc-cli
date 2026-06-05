@@ -1,3 +1,4 @@
+// Package simpletag implements a simple tag validator.
 package simpletag
 
 import (
@@ -14,16 +15,25 @@ var (
 	rxDescription = regexp.MustCompile(`^[A-Z0-9]\S*(?:\s\S*)+[^.!?,\s]$`)
 )
 
+// Name is the validators name.
 const Name = "simpletag"
 
+// Validator checks if the commit message summary starts with a tag in square brackets followed by a description.
+// The tag should be either
+// - a single '*' or
+// - completely lowercase letters or numbers, at least 2 characters long, other allowed characters are: '|', '-' and spaces.
+// The tag can also contain multiple categories separated by '|', for example: [feat|fix].
+// The description should start with an uppercase letter or number, should be not to short and should not end with a punctuation.
 type Validator struct {
 	gitcc.BaseValidator
 }
 
-func NewValidator() (gitcc.Validator, error) {
+// NewValidator create a new simpletag validator.
+func NewValidator() (*Validator, error) {
 	return &Validator{}, nil
 }
 
+// Validate validates a commit.
 func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
 	return v.validateSummary(gitcc.MessageToSummary(commit.Message))
 }
@@ -31,7 +41,7 @@ func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
 func (*Validator) validateSummary(summary string) gitcc.Result {
 	matches := rxParser.FindStringSubmatch(summary)
 
-	if len(matches) != 3 {
+	if len(matches) != 3 { //nolint:revive
 		return gitcc.Result{
 			Status:  gitcc.Invalid,
 			Message: "Summary format is invalid. It must follow '[<tag>] <Good Description>'",

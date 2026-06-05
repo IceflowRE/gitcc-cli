@@ -1,3 +1,4 @@
+// Package regex provides a validator that checks if the commit message summary and description match specified regular expressions.
 package regex
 
 import (
@@ -9,8 +10,10 @@ import (
 	"github.com/IceflowRE/gitcc/v3/standalone/gitcc"
 )
 
+// Name is the validators name.
 const Name = "regex"
 
+// Validator using regular expressions.
 type Validator struct {
 	gitcc.BaseValidator
 
@@ -18,10 +21,14 @@ type Validator struct {
 	descriptionRx *regexp.Regexp
 }
 
-func NewValidator() (gitcc.Validator, error) {
+// NewValidator create a new regex validator.
+func NewValidator() (*Validator, error) {
 	return &Validator{}, nil
 }
 
+// SetOptions sets the options for the regex validator. Supported options are:
+// - "summary": a regular expression that the commit message summary must match.
+// - "description": a regular expression that the commit message description must match.
 func (v *Validator) SetOptions(options map[string]string) error {
 	v.Options = options
 
@@ -44,6 +51,7 @@ func (v *Validator) SetOptions(options map[string]string) error {
 	return nil
 }
 
+// Validate validates a commit.
 func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
 	return v.validateMessage(commit.Message)
 }

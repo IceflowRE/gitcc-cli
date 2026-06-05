@@ -1,4 +1,4 @@
-package simpletag
+package simpletag //nolint:testpackage
 
 import (
 	"testing"
@@ -25,7 +25,7 @@ func Test(t *testing.T) {
 		{
 			name:    "invalid category tag",
 			summary: "[FeaT] Add new feature",
-			want:    "Invalid category tag. It should be either a single '*' or completely lowercase letters or numbers, at least 2 characters long, other allowed characters are: '|', '-' and spaces.",
+			want:    "Invalid category tag. It should be either a single '*' or completely lowercase letters or numbers, at least 2 characters long, other allowed characters are: '|', '-' and spaces.", //nolint:lll
 		},
 		{
 			name:    "invalid description",
@@ -44,7 +44,7 @@ func Test(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range tests { //nolint:varnamelen
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

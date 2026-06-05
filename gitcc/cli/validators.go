@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -8,6 +9,8 @@ import (
 
 	"github.com/IceflowRE/gitcc/v3/standalone/gitcc/validators"
 )
+
+var errFailedToInitializeDB = errors.New("failed to initialize validator database")
 
 type validatorsCmd struct {
 	*cobra.Command
@@ -19,7 +22,7 @@ func newValidatorsCmd(ctx *validationContext) *validatorsCmd {
 	cmd := &validatorsCmd{
 		Command: &cobra.Command{
 			Use:   "validator",
-			Short: "Manage validator.",
+			Short: "Manage validators.",
 		},
 		ctx: ctx,
 	}
@@ -57,7 +60,7 @@ func newValidatorsCmd(ctx *validationContext) *validatorsCmd {
 func (cmd *validatorsCmd) listValidators(*cobra.Command, []string) (err error) {
 	err = cmd.initDB()
 	if err != nil {
-		return fmt.Errorf("failed to initialize validator database: %w", err)
+		return fmt.Errorf("%w: %w", errFailedToInitializeDB, err)
 	}
 
 	for _, name := range cmd.ctx.db.AvailableNames() {
@@ -70,7 +73,7 @@ func (cmd *validatorsCmd) listValidators(*cobra.Command, []string) (err error) {
 func (cmd *validatorsCmd) removeValidators(_ *cobra.Command, args []string) (err error) {
 	err = cmd.initDB()
 	if err != nil {
-		return fmt.Errorf("failed to initialize validator database: %w", err)
+		return fmt.Errorf("%w: %w", errFailedToInitializeDB, err)
 	}
 
 	for _, name := range args {
@@ -94,7 +97,8 @@ func (cmd *validatorsCmd) pruneValidators(_ *cobra.Command, _ []string) (err err
 	deleted, err := validators.PruneValidators()
 
 	if len(deleted) > 0 {
-		fmt.Fprintf(cmd.OutOrStdout(), "deleted versions\n")
+		fmt.Fprint(cmd.OutOrStdout(), "deleted versions\n")
+
 		for _, name := range deleted {
 			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", name)
 		}
@@ -110,13 +114,13 @@ func (cmd *validatorsCmd) pruneValidators(_ *cobra.Command, _ []string) (err err
 func (cmd *validatorsCmd) compileValidator(_ *cobra.Command, args []string) (err error) {
 	err = cmd.initDB()
 	if err != nil {
-		return fmt.Errorf("failed to initialize validator database: %w", err)
+		return fmt.Errorf("%w: %w", errFailedToInitializeDB, err)
 	}
 
 	name := args[0]
 	path := args[1]
 
-	_, err = cmd.ctx.db.CompileCustom(name, path, "")
+	_, err = cmd.ctx.db.CompileCustom(path, name, "")
 	if err != nil {
 		return fmt.Errorf("failed to compile validator: %w", err)
 	}

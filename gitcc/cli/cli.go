@@ -1,3 +1,4 @@
+// Package cli provides the commandline interface for gitcc.
 package cli
 
 import (
@@ -6,10 +7,12 @@ import (
 	"github.com/IceflowRE/gitcc/v3/standalone/gitcc"
 )
 
+// Cli is the commandline interface entrypoint.
 type Cli struct {
 	rootCmd *cobra.Command
 }
 
+// NewCli creates a new Cli instance.
 func NewCli(validator gitcc.Validator) *Cli {
 	cli := &Cli{
 		rootCmd: &cobra.Command{},
@@ -27,6 +30,7 @@ func NewCli(validator gitcc.Validator) *Cli {
 	return cli
 }
 
+// Execute runs the main application.
 func (cli *Cli) Execute() error {
 	return cli.rootCmd.Execute()
 }

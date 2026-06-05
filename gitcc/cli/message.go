@@ -20,20 +20,21 @@ type messageCmd struct {
 func newMessageCmd(ctx *validationContext) (cmd *messageCmd) {
 	cmd = &messageCmd{
 		validateBaseCmd: newValidateBaseCmd(&cobra.Command{
-			Use:   "message message",
+			Use:   "message message", //nolint:dupword
 			Args:  cobra.MaximumNArgs(1),
 			Short: "Validate a given message.",
 		}, ctx),
 	}
 	cmd.Flags().StringVarP(&cmd.file, "file", "", "",
 		"Path to a text file to validate.")
+
 	cmd.RunE = cmd.runE
 	cmd.PreRunE = func(_ *cobra.Command, args []string) error {
 		if len(args) != 0 && cmd.file != "" {
-			return errors.New("cannot specify both a message argument and --file flag")
+			return errors.New("cannot specify both a message argument and --file flag") //nolint:err113
 		}
 		if len(args) == 0 && cmd.file == "" {
-			return errors.New("must specify either a message argument or --file flag")
+			return errors.New("must specify either a message argument or --file flag") //nolint:err113
 		}
 
 		return nil
