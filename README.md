@@ -61,7 +61,7 @@ You can use the [Regex Validator](https://github.com/IceflowRE/gitcc-cli/blob/ma
 
 ### Installation
 
-Compile it explictely
+Compile it explicitly
 
 ```bash
 gitcc validator compile NAME /path/to/validator
