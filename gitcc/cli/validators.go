@@ -97,7 +97,7 @@ func (cmd *validatorsCmd) pruneValidators(_ *cobra.Command, _ []string) (err err
 	deleted, err := validators.PruneValidators()
 
 	if len(deleted) > 0 {
-		fmt.Fprint(cmd.OutOrStdout(), "deleted versions\n")
+		fmt.Fprint(cmd.OutOrStdout(), "removed\n")
 
 		for _, name := range deleted {
 			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", name)

@@ -71,7 +71,7 @@ func newValidateBaseCmd(ccmd *cobra.Command, ctx *validationContext) *validateBa
 
 func (cmd *validateBaseCmd) preRunE(*cobra.Command, []string) (err error) {
 	if cmd.validatorName == "" && cmd.validatorPath == "" {
-		return errors.New("must specify either --name or --path") //nolint:err113
+		return errors.New("must specify at least --name or --file") //nolint:err113
 	}
 	cmd.ctx.db, err = validators.NewDB()
 	if err != nil {

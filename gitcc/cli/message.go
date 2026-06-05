@@ -63,6 +63,7 @@ func (cmd *messageCmd) runE(_ *cobra.Command, args []string) error {
 		}
 
 		res := validator.Validate(commit)
+		res.Commit = commit
 		fmt.Fprintln(cmd.OutOrStdout(), res.String())
 
 		cmd.SilenceErrors = true

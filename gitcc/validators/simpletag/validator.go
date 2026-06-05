@@ -11,7 +11,7 @@ import (
 
 var (
 	rxParser      = regexp.MustCompile(`^\[(.*)\] (.*)$`)
-	rxCategory    = regexp.MustCompile(`^(?:[a-z0-9]{2,}|[a-z0-9][ -][a-z0-9]+)(?:[ -][a-z0-9]+)*(?:\|(?:[a-z0-9]{2,}|[a-z0-9][ -][a-z0-9]+)(?:[ -][a-z0-9]+)*)*$`)
+	rxCategory    = regexp.MustCompile(`^(?:\*|(?:[a-z0-9]{2,}|[a-z0-9][ -][a-z0-9]+)(?:[ -][a-z0-9]+)*(?:\|(?:[a-z0-9]{2,}|[a-z0-9][ -][a-z0-9]+)(?:[ -][a-z0-9]+)*)*)$`) //nolint:lll
 	rxDescription = regexp.MustCompile(`^[A-Z0-9]\S*(?:\s\S*)+[^.!?,\s]$`)
 )
 

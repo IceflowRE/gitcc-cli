@@ -11,9 +11,15 @@ import (
 	"github.com/IceflowRE/gitcc-cli/v3/gitcc"
 )
 
+// ErrInvalidSHA is returned when an invalid SHA string is provided.
+var ErrInvalidSHA = errors.New("invalid SHA")
+
 // ValidateCommit validates a specific commit by its SHA string.
 func ValidateCommit(validator gitcc.Validator, repo *git.Repository, sha string) (gitcc.Result, error) {
-	hash := plumbing.NewHash(sha)
+	hash, ok := plumbing.FromHex(sha)
+	if !ok {
+		return gitcc.Result{}, fmt.Errorf("%w: %s", ErrInvalidSHA, sha)
+	}
 	commit, err := repo.CommitObject(hash)
 	if err != nil {
 		return gitcc.Result{}, fmt.Errorf("failed to resolve commit %q: %w", sha, err)
@@ -48,7 +54,12 @@ func ValidateHistory(validator gitcc.Validator, repo *git.Repository, exitSha st
 		From: ref.Hash(),
 	}
 	if exitSha != "" {
-		opts.To = plumbing.NewHash(exitSha)
+		var ok bool
+
+		opts.To, ok = plumbing.FromHex(exitSha)
+		if !ok {
+			return nil, fmt.Errorf("%w: %s", ErrInvalidSHA, exitSha)
+		}
 	}
 	cIter, err := repo.Log(opts)
 	if err != nil {
