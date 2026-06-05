@@ -171,7 +171,7 @@ func (db *DB) compile(name string, path string, hash string) (string, error) {
 
 	// create main.go
 	mainPath := filepath.Join(dir, "main.go")
-	err = os.WriteFile(mainPath, mainFile, 0o600) //nolint:revive
+	err = os.WriteFile(mainPath, mainFile, 0o600) //nolint:mnd
 	if err != nil {
 		return "", fmt.Errorf("write main.go: %w", err)
 	}
@@ -184,13 +184,13 @@ func (db *DB) compile(name string, path string, hash string) (string, error) {
 
 	// create go.mod
 	modData := []byte("module github.com/IceflowRE/gitcc-cli/v3/custom")
-	err = os.WriteFile(filepath.Join(dir, "go.mod"), modData, 0o600) //nolint:revive
+	err = os.WriteFile(filepath.Join(dir, "go.mod"), modData, 0o600) //nolint:mnd
 	if err != nil {
 		return "", fmt.Errorf("write go.mod: %w", err)
 	}
 
 	// go mod tidy
-	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute) //nolint:mnd
 	defer cancel()
 
 	tidyCmd := exec.CommandContext(ctx, "go", "mod", "tidy")
@@ -201,7 +201,7 @@ func (db *DB) compile(name string, path string, hash string) (string, error) {
 	}
 
 	// compile
-	cCtx, cCancel := context.WithTimeout(context.Background(), 4*time.Minute)
+	cCtx, cCancel := context.WithTimeout(context.Background(), 4*time.Minute) //nolint:mnd
 	defer cCancel()
 
 	outPath := filepath.Join(db.validatorDir, executableName(name, hash))
@@ -257,7 +257,7 @@ func GetGitccCacheDir() (string, error) {
 		return "", err
 	}
 	cacheDir := filepath.Join(userCacheDir, "gitcc")
-	err = os.MkdirAll(cacheDir, 0o750) //nolint:revive
+	err = os.MkdirAll(cacheDir, 0o750) //nolint:mnd
 	if err != nil {
 		return "", err
 	}
@@ -271,7 +271,7 @@ func getValidatorCacheDir() (string, error) {
 		return "", err
 	}
 	dir := filepath.Join(cacheDir, getCurrentVersion())
-	err = os.MkdirAll(dir, 0o750) //nolint:revive
+	err = os.MkdirAll(dir, 0o750) //nolint:mnd
 	if err != nil {
 		return "", err
 	}
@@ -282,7 +282,7 @@ func getValidatorCacheDir() (string, error) {
 func shortSHA256(data []byte) string {
 	sum := sha256.Sum256(data)
 
-	return hex.EncodeToString(sum[:])[:10] //nolint:revive
+	return hex.EncodeToString(sum[:])[:10]
 }
 
 func getShortSha256(path string) (string, error) {

@@ -45,7 +45,7 @@ func newValidatorsCmd(ctx *validationContext) *validatorsCmd {
 	cmd.AddCommand(&cobra.Command{
 		Use:   "compile name path",
 		Short: "compile a validator from a go file",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(2), //nolint:mnd
 		RunE:  cmd.compileValidator,
 	})
 	cmd.AddCommand(&cobra.Command{

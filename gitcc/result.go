@@ -18,7 +18,7 @@ func (s Status) Severity() int {
 	case Warning:
 		return 1
 	case Invalid:
-		return 2 //nolint:revive
+		return 2 //nolint:mnd
 	}
 
 	return -1

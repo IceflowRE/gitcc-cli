@@ -16,7 +16,7 @@ func getExitErrorFromStatus(status gitcc.Status) error {
 	case gitcc.Invalid:
 		return &ExitError{Code: 1}
 	case gitcc.Warning:
-		return &ExitError{Code: 2} //nolint:revive
+		return &ExitError{Code: 2} //nolint:mnd
 	case gitcc.Valid:
 	default:
 		return nil

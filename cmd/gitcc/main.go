@@ -24,5 +24,5 @@ func main() {
 	}
 	fmt.Fprintln(os.Stderr, err)
 
-	os.Exit(3) //nolint:revive
+	os.Exit(3) //nolint:mnd
 }

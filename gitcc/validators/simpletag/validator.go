@@ -41,7 +41,7 @@ func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
 func (*Validator) validateSummary(summary string) gitcc.Result {
 	matches := rxParser.FindStringSubmatch(summary)
 
-	if len(matches) != 3 { //nolint:revive
+	if len(matches) != 3 { //nolint:mnd
 		return gitcc.Result{
 			Status:  gitcc.Invalid,
 			Message: "Summary format is invalid. It must follow '[<tag>] <Good Description>'",

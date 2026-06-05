@@ -108,7 +108,7 @@ func (cmd *validateBaseCmd) execExternal() (err error) {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:mnd
 	defer cancel()
 
 	valCmd := exec.CommandContext(ctx, validatorExecutable, os.Args[1:]...) //nolint:gosec
