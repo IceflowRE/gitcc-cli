@@ -26,6 +26,7 @@ func NewValidator(options map[string]string) (*Validator, error) {
 		if err != nil {
 		return nil, err
 		}
+
 	return val, nil
 }
 
