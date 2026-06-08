@@ -13,13 +13,13 @@ type Cli struct {
 }
 
 // NewCli creates a new Cli instance.
-func NewCli(validator gitcc.Validator) *Cli {
+func NewCli(newValidatorFn gitcc.ValidatorConstructor) *Cli {
 	cli := &Cli{
 		rootCmd: &cobra.Command{},
 	}
 	cli.rootCmd.CompletionOptions.DisableDefaultCmd = true
 
-	ctx := newValidationContext(validator)
+	ctx := newValidationContext(newValidatorFn)
 	cli.rootCmd.AddCommand(
 		newCommitCmd(ctx).Command,
 		newHistoryCmd(ctx).Command,

@@ -22,7 +22,7 @@ func TestHeadSimpleTag(t *testing.T) {
 	repoFail, err := internal.LoadRepository("testdata/simpletag_fail")
 	require.NoError(t, err)
 
-	validator, err := simpletag.NewValidator()
+	validator, err := simpletag.NewValidator(map[string]string{})
 	require.NoError(t, err)
 
 	res, err := internal.ValidateHead(validator, repoOk)
@@ -43,7 +43,7 @@ func TestHistorySimpleTag(t *testing.T) {
 	repoFail, err := internal.LoadRepository("testdata/simpletag_fail")
 	require.NoError(t, err)
 
-	validator, err := simpletag.NewValidator()
+	validator, err := simpletag.NewValidator(map[string]string{})
 	require.NoError(t, err)
 
 	res, err := internal.ValidateHistory(validator, repoOk, "")

@@ -32,7 +32,7 @@ var ErrValidatorNotFound = errors.New("validator not found")
 // DB represents a database of validators, including both built-in and custom validators.
 // The database it no ment to be in a long running session, compiled validators are not added.
 type DB struct {
-	builtin          map[string]func() (gitcc.Validator, error)
+	builtin          map[string]gitcc.ValidatorConstructor
 	validatorDir     string
 	customValidators []validatorMeta
 }
@@ -44,9 +44,9 @@ func NewDB() (*DB, error) {
 		return nil, err
 	}
 	db := &DB{
-		builtin: map[string]func() (gitcc.Validator, error){
-			regex.Name:     func() (gitcc.Validator, error) { return regex.NewValidator() },
-			simpletag.Name: func() (gitcc.Validator, error) { return simpletag.NewValidator() },
+		builtin: map[string]gitcc.ValidatorConstructor{
+			regex.Name:     func(options map[string]string) (gitcc.Validator, error) { return regex.NewValidator(options) },
+			simpletag.Name: func(options map[string]string) (gitcc.Validator, error) { return simpletag.NewValidator(options) },
 		},
 		validatorDir: valCacheDir,
 	}
@@ -71,10 +71,10 @@ func (db *DB) AvailableNames() []string {
 
 // GetBuiltin retrieves a built-in validator by its name.
 // If the validator is not found, ErrValidatorNotFound is returned.
-func (db *DB) GetBuiltin(name string) (gitcc.Validator, error) { //nolint:ireturn
-	validatorFn, ok := db.builtin[name]
+func (db *DB) GetBuiltin(name string) (gitcc.ValidatorConstructor, error) {
+	newValidatorFn, ok := db.builtin[name]
 	if ok {
-		return validatorFn()
+		return newValidatorFn, nil
 	}
 
 	return nil, ErrValidatorNotFound

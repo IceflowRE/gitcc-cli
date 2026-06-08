@@ -24,12 +24,10 @@ const Name = "simpletag"
 // - completely lowercase letters or numbers, at least 2 characters long, other allowed characters are: '|', '-' and spaces.
 // The tag can also contain multiple categories separated by '|', for example: [feat|fix].
 // The description should start with an uppercase letter or number, should be not to short and should not end with a punctuation.
-type Validator struct {
-	gitcc.BaseValidator
-}
+type Validator struct{}
 
 // NewValidator create a new simpletag validator.
-func NewValidator() (*Validator, error) {
+func NewValidator(_options map[string]string) (*Validator, error) {
 	return &Validator{}, nil
 }
 

@@ -15,40 +15,18 @@ const Name = "regex"
 
 // Validator using regular expressions.
 type Validator struct {
-	gitcc.BaseValidator
-
 	summaryRx     *regexp.Regexp
 	descriptionRx *regexp.Regexp
 }
 
 // NewValidator create a new regex validator.
-func NewValidator() (*Validator, error) {
-	return &Validator{}, nil
-}
-
-// SetOptions sets the options for the regex validator. Supported options are:
-// - "summary": a regular expression that the commit message summary must match.
-// - "description": a regular expression that the commit message description must match.
-func (v *Validator) SetOptions(options map[string]string) error {
-	v.Options = options
-
-	if summaryRx, ok := options["summary"]; ok {
-		rx, err := regexp.Compile(summaryRx)
+func NewValidator(options map[string]string) (*Validator, error) {
+	val := &Validator{}
+	err := val.setOptions(options)
 		if err != nil {
-			return fmt.Errorf("invalid summary regex: %w", err)
+		return nil, err
 		}
-		v.summaryRx = rx
-	}
-
-	if descriptionRx, ok := options["description"]; ok {
-		rx, err := regexp.Compile(descriptionRx)
-		if err != nil {
-			return fmt.Errorf("invalid description regex: %w", err)
-		}
-		v.descriptionRx = rx
-	}
-
-	return nil
+	return val, nil
 }
 
 // Validate validates a commit.
@@ -76,4 +54,27 @@ func (v *Validator) validateMessage(message string) gitcc.Result {
 		Status:  gitcc.Valid,
 		Message: "",
 	}
+}
+
+// SetOptions sets the options for the regex validator. Supported options are:
+// - "summary": a regular expression that the commit message summary must match.
+// - "description": a regular expression that the commit message description must match.
+func (v *Validator) setOptions(options map[string]string) error {
+	if summaryRx, ok := options["summary"]; ok {
+		rx, err := regexp.Compile(summaryRx)
+		if err != nil {
+			return fmt.Errorf("invalid summary regex: %w", err)
+		}
+		v.summaryRx = rx
+	}
+
+	if descriptionRx, ok := options["description"]; ok {
+		rx, err := regexp.Compile(descriptionRx)
+		if err != nil {
+			return fmt.Errorf("invalid description regex: %w", err)
+		}
+		v.descriptionRx = rx
+	}
+
+	return nil
 }

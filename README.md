@@ -55,7 +55,7 @@ Accepts two options `-o summary="..."` and `-o description="..."` for validating
 
 You can provide your own custom validator written in Go.
 
-You have to implement the [`Validator`](https://github.com/IceflowRE/gitcc-cli/blob/main/gitcc/validator.go#L9) interface and provide a function `NewValidator() (*Validator, error)` in a `main` package.
+You have to implement the [`Validator`](https://github.com/IceflowRE/gitcc-cli/blob/main/gitcc/validator.go#L9) interface and provide a function `NewValidator(options map[string]string) (*Validator, error)` in a `main` package.
 
 You can use the [Regex Validator](https://github.com/IceflowRE/gitcc-cli/blob/main/gitcc/validators/regex/validator.go) as an example and the template below as a starting point.
 
@@ -83,14 +83,11 @@ To use a custom validator, either provide the name of the validator it was insta
 package main
 
 import (
-	"github.com/IceflowRE/gitcc-cli/v3/gitcc"
 	"github.com/go-git/go-git/v6/plumbing/object"
+	"github.com/IceflowRE/gitcc-cli/v3/gitcc"
 )
 
-type Validator struct {
-	// implements already SetOptions and saves it into Options.
-	*gitcc.BaseValidator
-}
+type Validator struct {}
 
 func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
 	return gitcc.Result{
@@ -100,7 +97,7 @@ func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
 	}
 }
 
-func NewValidator() (*Validator, error) {
+func NewValidator(options map[string]string) (*Validator, error) {
 	return &Validator{}, nil
 }
 ```

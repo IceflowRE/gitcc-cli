@@ -20,15 +20,15 @@ var (
 )
 
 type validationContext struct {
-	// validator to use
-	validator gitcc.Validator
+	// newValidatorFn to use
+	newValidatorFn gitcc.ValidatorConstructor
 	// db is not loaded if validator is set
 	db *validators.DB
 }
 
-func newValidationContext(validator gitcc.Validator) *validationContext {
+func newValidationContext(newValidatorFn gitcc.ValidatorConstructor) *validationContext {
 	return &validationContext{
-		validator: validator,
+		newValidatorFn: newValidatorFn,
 	}
 }
 
@@ -58,7 +58,7 @@ func newValidateBaseCmd(ccmd *cobra.Command, ctx *validationContext) *validateBa
 	cmd.PersistentFlags().StringToStringVarP(&cmd.options, "options", "o", nil,
 		"Options to pass to the validator in the format --options key=value. This flag can be specified multiple times for multiple options.")
 
-	if ctx.validator == nil {
+	if ctx.newValidatorFn == nil {
 		cmd.PreRunE = cmd.preRunE
 	} else {
 		_ = cmd.PersistentFlags().MarkHidden("compile")
@@ -80,7 +80,7 @@ func (cmd *validateBaseCmd) preRunE(*cobra.Command, []string) (err error) {
 
 	// check builtins
 	if cmd.validatorPath == "" {
-		cmd.ctx.validator, err = cmd.ctx.db.GetBuiltin(cmd.validatorName)
+		cmd.ctx.newValidatorFn, err = cmd.ctx.db.GetBuiltin(cmd.validatorName)
 		if err != nil {
 			return err
 		}
@@ -90,16 +90,16 @@ func (cmd *validateBaseCmd) preRunE(*cobra.Command, []string) (err error) {
 }
 
 func (cmd *validateBaseCmd) validate(action func(validator gitcc.Validator) error) error {
-	if cmd.ctx.validator == nil {
+	if cmd.ctx.newValidatorFn == nil {
 		return cmd.execExternal()
 	}
 
-	err := cmd.ctx.validator.SetOptions(cmd.options)
+	validator, err := cmd.ctx.newValidatorFn(cmd.options)
 	if err != nil {
-		return fmt.Errorf("failed to set options: %w", err)
+		return fmt.Errorf("failed to create validator: %w", err)
 	}
 
-	return action(cmd.ctx.validator)
+	return action(validator)
 }
 
 func (cmd *validateBaseCmd) execExternal() (err error) {
