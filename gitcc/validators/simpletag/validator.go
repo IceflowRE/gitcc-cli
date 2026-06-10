@@ -42,23 +42,21 @@ func (*Validator) validateSummary(summary string) gitcc.Result {
 	if len(matches) != 3 { //nolint:mnd
 		return gitcc.Result{
 			Status:  gitcc.Invalid,
-			Message: "Summary format is invalid. It must follow '[<tag>] <Good Description>'",
+			Message: "Summary has invalid format. Expected: '[<tag>] <Description>'",
 		}
 	}
 
 	if !rxCategory.MatchString(matches[1]) {
 		return gitcc.Result{
-			Status: gitcc.Invalid,
-			Message: "Invalid category tag. It should be either a single '*' or completely lowercase " +
-				"letters or numbers, at least 2 characters long, other allowed characters are: '|', '-' and spaces.",
+			Status:  gitcc.Invalid,
+			Message: "Category tag must be a single '*' or lowercase letters/numbers (at least 2 characters), optionally separated by '|', '-' or spaces.",
 		}
 	}
 
 	if !rxDescription.MatchString(matches[2]) {
 		return gitcc.Result{
-			Status: gitcc.Invalid,
-			Message: "Invalid description. It should start with an uppercase letter or number, " +
-				"should be not to short and should not end with a punctuation.",
+			Status:  gitcc.Invalid,
+			Message: "Description must start with an uppercase letter or number, be sufficiently long and not end with punctuation.",
 		}
 	}
 

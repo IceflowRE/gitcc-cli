@@ -23,9 +23,9 @@ type Validator struct {
 func NewValidator(options map[string]string) (*Validator, error) {
 	val := &Validator{}
 	err := val.setOptions(options)
-		if err != nil {
+	if err != nil {
 		return nil, err
-		}
+	}
 
 	return val, nil
 }
@@ -40,14 +40,14 @@ func (v *Validator) validateMessage(message string) gitcc.Result {
 	if v.summaryRx != nil && !v.summaryRx.MatchString(summary) {
 		return gitcc.Result{
 			Status:  gitcc.Invalid,
-			Message: fmt.Sprintf("Summary does not match the pattern '%s'", v.summaryRx.String()),
+			Message: fmt.Sprintf("Summary does not match pattern '%s'", v.summaryRx.String()),
 		}
 	}
 
 	if v.descriptionRx != nil && !v.descriptionRx.MatchString(description) {
 		return gitcc.Result{
 			Status:  gitcc.Invalid,
-			Message: fmt.Sprintf("Description does not match the pattern '%s'", v.descriptionRx.String()),
+			Message: fmt.Sprintf("Description does not match pattern '%s'", v.descriptionRx.String()),
 		}
 	}
 
