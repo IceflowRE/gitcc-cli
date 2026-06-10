@@ -87,7 +87,11 @@ import (
 	"github.com/IceflowRE/gitcc-cli/v3/gitcc"
 )
 
-type Validator struct {}
+type Validator struct{}
+
+func NewValidator(options map[string]string) (gitcc.Validator, error) {
+	return &Validator{}, nil
+}
 
 func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
 	return gitcc.Result{
@@ -95,10 +99,6 @@ func (v *Validator) Validate(commit *object.Commit) gitcc.Result {
 		// Messages are ignored for valid results.
 		Message: "This is a dummy validator that always returns valid. Please implement your own validator.",
 	}
-}
-
-func NewValidator(options map[string]string) (*Validator, error) {
-	return &Validator{}, nil
 }
 ```
 

@@ -146,7 +146,7 @@ func (db *DB) CompileCustom(path string, name string, hash string) (validatorPat
 		}
 	}
 
-	return db.compile(name, path, hash)
+	return db.compile(name, path, hash, "")
 }
 
 func (db *DB) getCustomByHash(hash string) string {
@@ -163,8 +163,8 @@ func (db *DB) getCustomByHash(hash string) string {
 //go:embed main.tmpl
 var mainFile []byte
 
-func (db *DB) compile(name string, path string, hash string) (string, error) {
-	dir, err := os.MkdirTemp("", "*")
+func (db *DB) compile(name string, path string, hash string, tempBaseDir string) (string, error) {
+	dir, err := os.MkdirTemp(tempBaseDir, "*")
 	if err != nil {
 		return "", err
 	}
