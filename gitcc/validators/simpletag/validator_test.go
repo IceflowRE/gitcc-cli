@@ -20,17 +20,17 @@ func Test(t *testing.T) {
 		{
 			name:    "invalid format",
 			summary: "Add new feature",
-			want:    "Summary format is invalid. It must follow '[<tag>] <Good Description>'",
+			want:    "Summary has invalid format. Expected: '[<tag>] <Description>'",
 		},
 		{
 			name:    "invalid category tag",
 			summary: "[FeaT] Add new feature",
-			want:    "Invalid category tag. It should be either a single '*' or completely lowercase letters or numbers, at least 2 characters long, other allowed characters are: '|', '-' and spaces.", //nolint:lll
+			want:    "Category tag must be a single '*' or lowercase letters/numbers (at least 2 characters), optionally separated by '|', '-' or spaces.",
 		},
 		{
 			name:    "invalid description",
 			summary: "[feat] add new feature.",
-			want:    "Invalid description. It should start with an uppercase letter or number, should be not to short and should not end with a punctuation.",
+			want:    "Description must start with an uppercase letter or number, be sufficiently long and not end with punctuation.",
 		},
 		{
 			name:    "valid category tag with spaces",
