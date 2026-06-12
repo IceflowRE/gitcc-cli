@@ -23,8 +23,8 @@ func SplitCommitMessage(message string) (summary string, description string) {
 	summary, description, found := strings.Cut(message, "\n\n")
 
 	if !found {
-		return strings.TrimSpace(message), ""
+		return strings.TrimSuffix(message, "\n"), ""
 	}
 
-	return strings.TrimSpace(summary), strings.TrimSpace(description)
+	return summary, strings.TrimSuffix(description, "\n")
 }
