@@ -134,12 +134,11 @@ func (db *DB) CompileCustom(path string, name string, hash string) (validatorPat
 		if err != nil {
 			return "", fmt.Errorf("failed to get validator hash: %w", err)
 		}
-		hash = hash[:10]
 	}
 
 	// remove old validators
 	for _, meta := range db.customValidators {
-		if meta.Name == name || meta.Hash == hash {
+		if meta.Name == name || strings.HasPrefix(hash, meta.Hash) {
 			err := os.Remove(filepath.Join(db.validatorDir, meta.Filename()))
 			if err != nil {
 				return "", fmt.Errorf("failed to remove old validator: %w", err)
@@ -147,17 +146,12 @@ func (db *DB) CompileCustom(path string, name string, hash string) (validatorPat
 		}
 	}
 
-	return db.compile(name, path, hash, "")
+	return db.compile(name, path, hash[:10], "")
 }
 
 func (db *DB) getCustomByHash(hash string) string {
 	idx := slices.IndexFunc(db.customValidators, func(elem validatorMeta) bool {
-		hashLen := len(elem.Hash)
-		if hashLen > len(hash) {
-			return false
-		}
-
-		return elem.Hash[:len(hash)] == hash
+		return strings.HasPrefix(hash, elem.Hash)
 	})
 	if idx == -1 {
 		return ""
