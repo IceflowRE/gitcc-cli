@@ -83,7 +83,7 @@ func (db *DB) GetBuiltin(name string) (gitcc.ValidatorConstructor, error) {
 // GetCustom retrieves a custom validator by the file path of its source code.
 // Only absolute paths should be passed.
 func (db *DB) GetCustom(path string) string {
-	hash, err := getShortSha256(path)
+	hash, err := calcSha256(path)
 	if err != nil {
 		return ""
 	}
@@ -105,7 +105,7 @@ func (db *DB) GetCustomByName(name string) string {
 
 // GetOrCompileCustom retrieves a custom validator by the file path or compiles it if it does not exist or is outdated.
 func (db *DB) GetOrCompileCustom(path string, name string) (string, error) {
-	hash, err := getShortSha256(path)
+	hash, err := calcSha256(path)
 	if err != nil {
 		return "", fmt.Errorf("failed to get validator hash: %w", err)
 	}
@@ -130,10 +130,11 @@ func (db *DB) CompileCustom(path string, name string, hash string) (validatorPat
 	}
 
 	if hash == "" {
-		hash, err = getShortSha256(path)
+		hash, err = calcSha256(path)
 		if err != nil {
 			return "", fmt.Errorf("failed to get validator hash: %w", err)
 		}
+		hash = hash[:10]
 	}
 
 	// remove old validators
@@ -151,7 +152,12 @@ func (db *DB) CompileCustom(path string, name string, hash string) (validatorPat
 
 func (db *DB) getCustomByHash(hash string) string {
 	idx := slices.IndexFunc(db.customValidators, func(elem validatorMeta) bool {
-		return elem.Hash == hash
+		hashLen := len(elem.Hash)
+		if hashLen > len(hash) {
+			return false
+		}
+
+		return elem.Hash[:len(hash)] == hash
 	})
 	if idx == -1 {
 		return ""
@@ -284,19 +290,15 @@ func GetValidatorCacheDir() (string, error) {
 	return dir, nil
 }
 
-func shortSHA256(data []byte) string {
-	sum := sha256.Sum256(data)
-
-	return hex.EncodeToString(sum[:])[:10]
-}
-
-func getShortSha256(path string) (string, error) {
+func calcSha256(path string) (string, error) {
 	data, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
 		return "", err
 	}
 
-	return shortSHA256(data), nil
+	sum := sha256.Sum256(data)
+
+	return hex.EncodeToString(sum[:]), nil
 }
 
 type validatorMeta struct {
