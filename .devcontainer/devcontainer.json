@@ -1,8 +1,6 @@
 {
-	"name": "go-gitcc",
+	"name": "GitCC CLI",
 	"image": "mcr.microsoft.com/devcontainers/go:1.26",
-	"remoteUser": "vscode",
-	"containerUser": "vscode",
 	"customizations": {
 		"vscode": {
 			"extensions": [

@@ -1,8 +1,6 @@
 #!/bin/bash
 set -ex
 
-git config --global --add safe.directory /workspaces/gitcc
-
 # download go modules
 go mod download
 
