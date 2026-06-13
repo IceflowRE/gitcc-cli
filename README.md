@@ -4,10 +4,9 @@
 ![Programming Language](https://img.shields.io/badge/language-Go-orange.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/IceflowRE/gitcc/blob/main/LICENSE.md)
 
+GitCC CLI checks commit messages for certain rules.
 
-GitCC checks commit messages for certain rules.
-
-A native GitHub Actions is also available at [GitHub](https://github.com/IceflowRE/gitcc).
+A native GitHub Actions written in typescript is also available at [IceflowRE/gitcc](https://github.com/IceflowRE/gitcc).
 
 ## Installation
 
@@ -43,13 +42,13 @@ For more commands and options, check `gitcc --help`.
 
 ## Shipped validators
 
-### SimpleTag
-
-Format: `[<tag>] <Good Description>` (e.g. `[ci] Fix testing suite installation`)
-
 ### RegEx
 
 Accepts two options `-o summary="..."` and `-o description="..."` for validating the summary and description of the commit message. The value is a regular expression that has to match the text.
+
+### SimpleTag
+
+Format: `[<tag>] <Good Description>` (e.g. `[ci] Fix testing suite installation`)
 
 ## Custom validators
 
