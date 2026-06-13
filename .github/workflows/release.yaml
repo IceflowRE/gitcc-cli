@@ -17,7 +17,7 @@ jobs:
       - name: Download builds
         uses: actions/download-artifact@v8
         with:
-          path: dist
+          path: bin
           merge-multiple: true
 
       - name: Create GitHub Release
